@@ -48,35 +48,36 @@ public class DetailPageActivity extends AppCompatActivity {
 
         String pageId = String.valueOf(getIntent().getIntExtra(StringConstants.PAGE_ID, 0));
 
-        mProgressBar = (ProgressBar) findViewById(R.id.activity_detail_page_progress_bar);
-        mWebView = (WebView) findViewById(R.id.activity_detail_page_webview);
-        mWebView.getSettings().setLoadsImagesAutomatically(true);
-        mWebView.getSettings().setLoadWithOverviewMode(true);
-        mWebView.getSettings().setUseWideViewPort(true);
-        mWebView.setWebViewClient(new WebViewClient() {
-            boolean loaded;
+        if (pageId.equals("0")) {
+            Utilities.showToast(this, getString(R.string.could_not_load_page_text));
+        } else {
+            mProgressBar = (ProgressBar) findViewById(R.id.activity_detail_page_progress_bar);
+            mWebView = (WebView) findViewById(R.id.activity_detail_page_webview);
+            mWebView.getSettings().setLoadsImagesAutomatically(true);
+            mWebView.getSettings().setLoadWithOverviewMode(true);
+            mWebView.getSettings().setUseWideViewPort(true);
+            mWebView.setWebViewClient(new WebViewClient() {
+                boolean loaded;
 
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                mProgressBar.setVisibility(View.VISIBLE);
-                if (!loaded) {
-                    view.loadUrl(url);
-                    loaded = true;
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    if (!loaded) {
+                        view.loadUrl(url);
+                        loaded = true;
+                    } else {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    }
                     return true;
-                } else {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-                    return false;
                 }
-            }
 
-            @Override
-            public void onPageFinished(WebView view, final String url) {
-                mProgressBar.setVisibility(View.GONE);
-            }
-        });
+                @Override
+                public void onPageFinished(WebView view, final String url) {
+                    mProgressBar.setVisibility(View.GONE);
+                }
+            });
 
-        getDetailPageUrl(pageId);
-
+            getDetailPageUrl(pageId);
+        }
     }
 
     private void getDetailPageUrl(final String pageId) {
