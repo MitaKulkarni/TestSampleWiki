@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Test Wiki</string>
-    <string name="search_text">Search</string>
+    <string name="search_text">Search Text</string>
     <string name="error_connecting">Error in sending the network request. Please try again after some time.</string>
     <string name="no_internet_connection_error">No internet connection. Please check your connection.</string>
+    <string name="image_view_desc">Source image</string>
+    <string name="could_not_load_page_text">Could not open the page.</string>
 </resources>

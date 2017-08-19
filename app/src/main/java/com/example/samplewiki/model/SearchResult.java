@@ -65,9 +65,9 @@ public class SearchResult {
             public class Terms {
                 @SerializedName("description")
                 @Expose
-                private String description;
+                private ArrayList<String> description;
 
-                public String getDescription() {
+                public  ArrayList<String> getDescription() {
                     return description;
                 }
             }

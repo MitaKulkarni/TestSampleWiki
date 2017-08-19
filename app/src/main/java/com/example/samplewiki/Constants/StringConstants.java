@@ -6,4 +6,5 @@ package com.example.samplewiki.Constants;
 
 public class StringConstants {
     public static final String PAGE_ID = "id";
+    public static final String PAGE_TITLE = "title";
 }

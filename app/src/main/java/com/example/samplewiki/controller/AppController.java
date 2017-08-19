@@ -8,7 +8,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -30,14 +29,12 @@ public class AppController extends Application {
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
     private static AppController mInstance;
-    private static Typeface mTypeface;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         mInstance = this;
-        mTypeface = Typeface.createFromAsset(getAssets(), "icomoon1.ttf");
         CookieHandler.setDefault(new CookieManager());
 
     }
@@ -111,16 +108,6 @@ public class AppController extends Application {
     public void sendToast(Context context,String msg){
         Toast.makeText(context,msg,Toast.LENGTH_LONG);
 
-    }
-
-    public void setTypeface(TextView... views) {
-        for (TextView view : views) {
-            view.setTypeface(mTypeface);
-        }
-    }
-
-    public Typeface getTypeface() {
-        return mTypeface;
     }
 }
 

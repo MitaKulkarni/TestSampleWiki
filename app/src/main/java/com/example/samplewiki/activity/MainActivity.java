@@ -4,9 +4,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 
 import com.android.volley.Request;
@@ -39,58 +40,67 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mSearchList = new ArrayList<>();
-        final EditText searchEditTv = (EditText) findViewById(R.id.activity_main_search_et);
-        Button searchBtn = (Button) findViewById(R.id.activity_main_search_bt);
+        final AutoCompleteTextView searchAutoCompleteTv = (AutoCompleteTextView) findViewById(R.id.activity_main_search_at);
         RecyclerView searchRv = (RecyclerView) findViewById(R.id.activity_main_search_rv);
-        mProgressBar = (ProgressBar) findViewById(R.id.activity_main_progress_bar);
-
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         searchRv.setLayoutManager(linearLayoutManager);
 
         mSearchAdapter = new SearchResultsAdapter(this, mSearchList);
         searchRv.setAdapter(mSearchAdapter);
 
-        searchBtn.setOnClickListener(new View.OnClickListener() {
+        mProgressBar = (ProgressBar) findViewById(R.id.activity_main_progress_bar);
+
+        searchAutoCompleteTv.setThreshold(3);
+        searchAutoCompleteTv.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View view) {
-                getResultsFromServer(searchEditTv.getText().toString());
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                getResultsFromServer(searchAutoCompleteTv.getText().toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
             }
         });
     }
 
     private void getResultsFromServer(String searchText) {
 
+        String newSearchString = searchText.replace(" ", "+");
         if (Utilities.isNetworkAvailable(MainActivity.this)) {
             mProgressBar.setVisibility(View.VISIBLE);
-            String url = String.format(RequestURLs.WIKI_QUERY_URL, searchText);
-            JsonObjectRequest addMenuTask = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            String url = RequestURLs.WIKI_QUERY_URL + newSearchString + "&gpslimit=10";
+            JsonObjectRequest searchResultsTask = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
-                    mProgressBar.setVisibility(View.VISIBLE);
+                    mProgressBar.setVisibility(View.GONE);
                     mSearchList.clear();
-
-                    /*
-                    JSONObject queryJsonObject = jsonObject.optJSONObject(JsonKeys.query);
-                    JSONArray pagesArray = queryJsonObject.optJSONArray(JsonKeys.pages); */
 
                     Gson gson = new Gson();
                     SearchResult searchResult = gson.fromJson(jsonObject.toString(), SearchResult.class);
                     SearchResult.SearchQuery searchQuery = searchResult.getQuery();
-                    mSearchList = searchQuery.getPagesList();
-                    mSearchAdapter.notifyDataSetChanged();
+                    if(searchQuery != null && searchQuery.getPagesList().size() > 0) {
+                        mSearchList.addAll(searchQuery.getPagesList());
+                        mSearchAdapter.notifyDataSetChanged();
+                    }
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
-                    mProgressBar.setVisibility(View.VISIBLE);
+                    mProgressBar.setVisibility(View.GONE);
                     Utilities.showToast(MainActivity.this, getString(R.string.error_connecting));
                 }
             });
 
-            addMenuTask.setTag(TAG);
-            addMenuTask.setShouldCache(false);
-            AppController.getInstance().setRetryPolicy(addMenuTask);
-            AppController.getInstance().addToRequestQueue(addMenuTask);
+            searchResultsTask.setTag(TAG);
+            searchResultsTask.setShouldCache(false);
+            AppController.getInstance().setRetryPolicy(searchResultsTask);
+            AppController.getInstance().addToRequestQueue(searchResultsTask);
         } else {
             Utilities.showToast(this, getString(R.string.no_internet_connection_error));
         }

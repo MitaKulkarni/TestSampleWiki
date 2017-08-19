@@ -1,11 +1,16 @@
 package com.example.samplewiki.activity;
 
-import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -32,13 +37,41 @@ public class DetailPageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_page);
 
-        String pageId = getIntent().getStringExtra(StringConstants.PAGE_ID);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.activity_detail_page_toolbar);
+        TextView toolbarTitle = (TextView) findViewById(R.id.activity_detail_page_toolbar_title);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        String title = getIntent().getStringExtra(StringConstants.PAGE_TITLE);
+        toolbarTitle.setText(title);
+
+        String pageId = String.valueOf(getIntent().getIntExtra(StringConstants.PAGE_ID, 0));
+
         mProgressBar = (ProgressBar) findViewById(R.id.activity_detail_page_progress_bar);
         mWebView = (WebView) findViewById(R.id.activity_detail_page_webview);
         mWebView.getSettings().setLoadsImagesAutomatically(true);
-        mWebView.setWebViewClient(new WebViewClient(){
+        mWebView.getSettings().setLoadWithOverviewMode(true);
+        mWebView.getSettings().setUseWideViewPort(true);
+        mWebView.setWebViewClient(new WebViewClient() {
+            boolean loaded;
+
+            @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                return true;
+                mProgressBar.setVisibility(View.VISIBLE);
+                if (!loaded) {
+                    view.loadUrl(url);
+                    loaded = true;
+                    return true;
+                } else {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    return false;
+                }
+            }
+
+            @Override
+            public void onPageFinished(WebView view, final String url) {
+                mProgressBar.setVisibility(View.GONE);
             }
         });
 
@@ -53,7 +86,7 @@ public class DetailPageActivity extends AppCompatActivity {
             JsonObjectRequest addMenuTask = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
-                    mProgressBar.setVisibility(View.VISIBLE);
+                    mProgressBar.setVisibility(View.GONE);
 
                     try {
                         JSONObject queryJsonObject = jsonObject.getJSONObject(JsonKeys.QUERY);
@@ -69,7 +102,7 @@ public class DetailPageActivity extends AppCompatActivity {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
-                    mProgressBar.setVisibility(View.VISIBLE);
+                    mProgressBar.setVisibility(View.GONE);
                     Utilities.showToast(DetailPageActivity.this, getString(R.string.error_connecting));
                 }
             });
@@ -87,5 +120,15 @@ public class DetailPageActivity extends AppCompatActivity {
     protected void onDestroy() {
         AppController.getInstance().cancelPendingRequests(TAG);
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

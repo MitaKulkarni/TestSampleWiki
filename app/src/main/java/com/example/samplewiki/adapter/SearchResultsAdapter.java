@@ -1,6 +1,7 @@
 package com.example.samplewiki.adapter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import com.example.samplewiki.Constants.StringConstants;
 import com.example.samplewiki.R;
+import com.example.samplewiki.Utilities;
 import com.example.samplewiki.activity.DetailPageActivity;
 import com.example.samplewiki.model.SearchResult.SearchQuery.Pages;
 import com.squareup.picasso.Picasso;
@@ -41,17 +43,29 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         final ViewHolder viewHolder = (ViewHolder) holder;
         final Pages pages = mSearchList.get(position);
+        final Context context = viewHolder.itemView.getContext();
 
         viewHolder.titleTv.setText(pages.getTitle());
-        viewHolder.descriptionTv.setText(pages.getTerms().getDescription());
-        Picasso.with(viewHolder.itemView.getContext()).load(pages.getThumbnail().getSource()).into(viewHolder.imageView);
+        if (pages.getTerms() != null && pages.getTerms().getDescription() != null && pages.getTerms().getDescription().size() > 0) {
+            viewHolder.descriptionTv.setText(pages.getTerms().getDescription().get(0));
+        }
+
+        if (pages.getThumbnail() != null && pages.getThumbnail().getSource() != null && !pages.getThumbnail().getSource().isEmpty()) {
+            Picasso.with(context).load(pages.getThumbnail().getSource()).into(viewHolder.imageView);
+        }
 
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(mActivity, DetailPageActivity.class);
-                intent.putExtra(StringConstants.pageId, pages.getPageId());
-                mActivity.startActivity(intent);
+                if (pages.getPageId() != 0) {
+                    Intent intent = new Intent(mActivity, DetailPageActivity.class);
+                    intent.putExtra(StringConstants.PAGE_ID, pages.getPageId());
+                    intent.putExtra(StringConstants.PAGE_TITLE, pages.getTitle());
+                    mActivity.startActivity(intent);
+                }
+                else {
+                    Utilities.showToast(context,context.getString(R.string.could_not_load_page_text));
+                }
             }
         });
     }

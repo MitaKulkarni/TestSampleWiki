@@ -19,6 +19,7 @@
         <item name="android:textColorPrimary">@color/Black</item>
         <item name="android:windowBackground">@color/windowBackground</item>
         <item name="android:actionMenuTextColor">@color/colorPrimary</item>
+        <item name="colorControlNormal">@color/White</item>
     </style>
 
 </resources>

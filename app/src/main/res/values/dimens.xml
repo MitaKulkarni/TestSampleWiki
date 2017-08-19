@@ -63,4 +63,8 @@
     <dimen name="width_120_dp">120dp</dimen>
     <dimen name="width_140_dp">140dp</dimen>
 
+    <!-- elevation -->
+    <dimen name="elevation_4_dp">4dp</dimen>
+    <dimen name="elevation_5_dp">5dp</dimen>
+
 </resources>
