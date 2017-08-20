@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         mProgressBar = (ProgressBar) findViewById(R.id.activity_main_progress_bar);
 
-        searchAutoCompleteTv.setThreshold(4);
+        searchAutoCompleteTv.setThreshold(2);
         searchAutoCompleteTv.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
